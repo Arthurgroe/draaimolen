@@ -488,7 +488,9 @@ function renderList(){
   const d = dayObj(); const box = $('#list'); box.innerHTML = '';
   const mine = d.acts.filter(a => picks.has(a.id)).sort((a,b) => a.start - b.start || a.stage - b.stage);
   if (!mine.length){
-    box.innerHTML = `<div class="empty">Nothing picked for <b>${d.label}</b> yet.<br>Switch to the grid and tap the acts you want to see.</div>`;
+    box.innerHTML = `<div class="empty">Nothing picked for <b>${d.label}</b> yet.<br>Switch to the grid and tap the acts you want to see.</div>
+      <div class="actions"><button class="btn" id="import" type="button">Import picks from a link</button></div>`;
+    $('#import').onclick = importFromClipboard;
     return;
   }
   const hours = mine.reduce((t, a) => t + (a.end - a.start), 0) / 4;
@@ -511,6 +513,9 @@ function renderList(){
   const act = document.createElement('div'); act.className = 'actions';
   act.innerHTML = `<button class="btn" id="share" type="button">Share ${d.label}</button><button class="btn warn" id="clear" type="button">Clear ${d.label}</button>`;
   box.appendChild(act);
+  const act2 = document.createElement('div'); act2.className = 'actions'; act2.style.marginTop = '8px';
+  act2.innerHTML = `<button class="btn" id="import" type="button">Import picks from a link</button>`;
+  box.appendChild(act2); $('#import').onclick = importFromClipboard;
   $('#share').onclick = () => {
     const txt = `Draaimolen ${d.label} – my picks\n` + mine.map(a => `${tm(a.start)}–${tm(a.end)}  ${a.name}  @ ${DATA.stages[a.stage]}`).join('\n');
     const url = location.origin + location.pathname + '#p=' + [...picks].join(',');
@@ -522,8 +527,21 @@ function renderList(){
     mine.forEach(a => picks.delete(a.id)); store.set(KEY, [...picks]); renderAll();
   };
   const h = document.createElement('div'); h.className = 'hint';
-  h.textContent = 'Picks are saved on this phone only. Open the app from the same icon each time to keep them.';
+  h.textContent = 'Picks are saved on this phone only. Share the link to yourself as a backup — Import reads it back from your clipboard.';
   box.appendChild(h);
+}
+// import picks from a shared link (backup/restore, or a friend's list, from inside the app)
+function importPicks(text){
+  const m = (text || '').match(/p=([A-Za-z0-9,\-]+)/); const ids = (m ? m[1] : text || '').split(',').map(t => t.trim()).filter(id => byId[id]);
+  if (!ids.length) { toast('No picks found in that link'); return; }
+  const before = picks.size; ids.forEach(id => picks.add(id)); store.set(KEY, [...picks]);
+  renderAll(); toast(`Added ${picks.size - before} pick${picks.size - before === 1 ? '' : 's'}`);
+}
+async function importFromClipboard(){
+  let text = '';
+  try { text = await navigator.clipboard.readText(); } catch (e) {}
+  if (!text) text = prompt('Paste the picks link here:') || '';
+  if (text) importPicks(text);
 }
 function renderGridState(){ document.querySelectorAll('.act').forEach(el => el.classList.toggle('on', picks.has(el.dataset.id))); }
 
