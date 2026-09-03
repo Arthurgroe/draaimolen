@@ -46,7 +46,15 @@ header{flex:none;padding:calc(var(--sat) + 10px) calc(var(--sar) + 14px) 0 calc(
 .title h1 span{color:var(--fg)}
 .count{font-size:12px;color:var(--fg2);font-variant-numeric:tabular-nums}
 .count b{color:var(--pick);font-weight:700}
-nav{display:flex;align-items:center;gap:8px;margin:10px 0 10px}
+nav{display:flex;align-items:center;gap:8px;margin:10px 0 8px}
+.views{display:flex;gap:4px;background:rgba(18,32,29,.55);padding:3px;border-radius:9px;margin:0 0 10px}
+.view{flex:1;border:0;background:transparent;color:var(--fg2);font:inherit;font-size:12.5px;font-weight:700;padding:8px 4px;border-radius:7px;
+  display:flex;align-items:center;justify-content:center;gap:5px;letter-spacing:.02em}
+.view .dot{width:7px;height:7px;border-radius:50%;background:var(--pick)}
+.view .vc{font-variant-numeric:tabular-nums;color:var(--pick)}
+.view .vc:empty{display:none}
+.view.on{background:rgba(238,238,238,.92);color:#1a2b27}
+.view.on .vc{color:#8a5a1c}
 .tabs{display:flex;gap:6px;flex:1}
 .tab{flex:1;border:1px solid var(--pill-border);background:var(--pill-dark);color:var(--fg);font:inherit;font-size:14px;font-weight:700;
   padding:9px 6px;border-radius:8px;line-height:1.1;letter-spacing:.02em;text-shadow:var(--glow)}
@@ -55,11 +63,6 @@ nav{display:flex;align-items:center;gap:8px;margin:10px 0 10px}
 .tab.on small{color:#4d5f5a}
 .tab.today small::after{content:" · today";color:var(--now)}
 .tab.on.today small::after{color:#c2402f}
-.mode{flex:none;border:1px solid var(--pill-border);background:var(--pill-dark);color:var(--fg);font:inherit;font-size:13px;
-  font-weight:700;padding:9px 12px;border-radius:8px;height:52px;display:flex;align-items:center;gap:6px;text-shadow:var(--glow)}
-.mode .dot{width:8px;height:8px;border-radius:50%;background:var(--pick)}
-.mode.on{background:var(--pick);color:var(--pick-fg);border-color:transparent;text-shadow:none;box-shadow:0 0 16px var(--pick-glow)}
-.mode.on .dot{background:var(--pick-fg)}
 
 /* ---------- grid ---------- */
 #grid{flex:1;overflow:auto;position:relative;-webkit-overflow-scrolling:touch;
@@ -97,6 +100,45 @@ nav{display:flex;align-items:center;gap:8px;margin:10px 0 10px}
 .act.h3{--lines:2}
 .act.h1{justify-content:center;padding-top:0;padding-bottom:0}
 body.picks .act:not(.on){opacity:.22;filter:saturate(0)}
+/* ---------- map view ---------- */
+#map{flex:1;overflow:auto;display:none;padding:10px calc(var(--sar) + 14px) calc(var(--sab) + 30px) calc(var(--sal) + 14px)}
+.mapwrap{position:relative;width:100%;aspect-ratio:1080/1350;border-radius:10px;overflow:hidden;background:#1b302c;border:1px solid var(--pill-border)}
+.mapwrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.mk{position:absolute;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:rgba(238,238,238,.95);color:#1a2b27;
+  font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #1a2b27;z-index:2;box-shadow:0 1px 6px rgba(0,0,0,.4)}
+.mk.pick{background:var(--pick);box-shadow:0 0 0 3px rgba(233,167,92,.35),0 0 14px var(--pick-glow)}
+.mk.live::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid rgba(255,106,92,.8);animation:pulse 1.6s ease-out infinite}
+@keyframes pulse{0%{transform:scale(.7);opacity:1}100%{transform:scale(1.5);opacity:0}}
+.lb{position:absolute;z-index:2;max-width:30%;background:rgba(18,32,29,.86);border:1px solid var(--pill-border);border-radius:6px;padding:3px 6px;
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);line-height:1.15}
+.lb .st{display:block;font-size:7.5px;font-weight:700;letter-spacing:.1em;color:var(--fg2);text-transform:uppercase}
+.lb .ar{display:block;font-size:9.5px;font-weight:800;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-shadow:var(--glow)}
+.lb .ar small{font-weight:600;color:var(--fg2);text-shadow:none}
+.lb.pick{background:var(--pick);border-color:transparent}
+.lb.pick .ar,.lb.pick .st{color:var(--pick-fg);text-shadow:none}
+.lb.dim .ar{color:var(--fg2)}
+.scrub{display:flex;align-items:center;gap:10px;margin:12px 0 6px}
+.scrub b{font-variant-numeric:tabular-nums;font-size:15px;min-width:48px;text-shadow:var(--glow)}
+.scrub input{flex:1;-webkit-appearance:none;appearance:none;height:4px;border-radius:2px;background:rgba(255,255,255,.18);outline:0}
+.scrub input::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:var(--fg);border:0;box-shadow:0 1px 6px rgba(0,0,0,.4)}
+.scrub button{border:1px solid var(--pill-border);background:var(--pill-dark);color:var(--fg);font:inherit;font-size:12px;font-weight:700;padding:7px 10px;border-radius:7px}
+.scrub button.live{background:var(--now);border-color:transparent;color:#fff}
+.scrubhint{font-size:11px;color:var(--fg3);text-align:center;margin-bottom:10px}
+.mrow{display:flex;gap:10px;align-items:center;padding:9px 10px;margin-bottom:6px;border-radius:8px;background:var(--pill-dark);border:1px solid var(--pill-border)}
+.mrow .num{flex:none;width:24px;height:24px;border-radius:50%;background:rgba(238,238,238,.92);color:#1a2b27;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.mrow.pick .num{background:var(--pick)}
+.mrow .body{flex:1;min-width:0}
+.mrow .st{font-size:9.5px;letter-spacing:.1em;color:var(--fg2);text-transform:uppercase;font-weight:700}
+.mrow .ar{font-size:13px;font-weight:800;text-transform:uppercase;text-shadow:var(--glow);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrow .nx{font-size:11px;color:var(--fg2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mrow .nx b{color:var(--fg);font-weight:600}
+.mrow.pick .ar{color:var(--pick)}
+.strip .nn{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;letter-spacing:.01em}
+.strip .nn i:first-child{display:inline-block;min-width:34px}
+.strip .nn em{font-style:normal;font-weight:800;color:var(--fg);letter-spacing:.06em;margin-right:3px}
+.strip .nn + .nn{margin-top:3px}
+.strip .nn i{font-style:normal;color:var(--fg2);font-weight:600;margin-right:4px}
+.strip.nownext{text-align:left;font-size:12.5px}
 .nowline{position:absolute;left:0;right:0;height:0;border-top:2px solid var(--now);z-index:2;pointer-events:none;display:none}
 .nowline::before{content:"";position:absolute;left:var(--tcol);top:-5px;width:8px;height:8px;border-radius:50%;background:var(--now);margin-left:-4px}
 .nowlbl{position:absolute;left:0;right:0;display:none;background:var(--now);color:#fff;font-size:10.5px;font-weight:800;text-align:center;
@@ -104,7 +146,7 @@ body.picks .act:not(.on){opacity:.22;filter:saturate(0)}
 
 /* ---------- picks list ---------- */
 #list{flex:1;overflow:auto;display:none;padding:12px calc(var(--sar) + 14px) calc(var(--sab) + 30px) calc(var(--sal) + 14px)}
-body.picks #grid{display:none} body.picks #list{display:block}
+body.picks #grid,body.map #grid{display:none} body.picks #list{display:block} body.map #map{display:block}
 .empty{color:var(--fg2);text-align:center;padding:60px 20px;font-size:15px;line-height:1.5}
 .empty b{color:var(--fg)}
 .row{display:flex;gap:12px;align-items:stretch;padding:10px 12px;margin-bottom:8px;border-radius:8px;background:var(--pill-dark);
@@ -179,14 +221,19 @@ body.tod-night{background:
   <div class="title"><h1>Draaimolen ’26</h1><div class="count" id="count"></div></div>
   <nav>
     <div class="tabs" id="tabs"></div>
-    <button class="mode" id="mode" type="button"><span class="dot"></span>My picks</button>
   </nav>
+  <div class="views" id="views">
+    <button class="view on" data-v="grid" type="button">Timetable</button>
+    <button class="view" data-v="picks" type="button"><span class="dot"></span>My picks <span class="vc" id="vc"></span></button>
+    <button class="view" data-v="map" type="button">Map</button>
+  </div>
   <div class="strip" id="strip"></div>
   <div class="friendbar" id="friendbar"><span id="friendtxt"></span><button id="friendadd" type="button">Add to mine</button><button class="ghost" id="frienddismiss" type="button">Hide</button></div>
 </header>
 
 <div id="grid"><div class="sheet" id="sheet"></div></div>
 <div id="list"></div>
+<div id="map"></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -202,7 +249,8 @@ const store = {
 };
 let picks = new Set(store.get(KEY, []));
 let day = store.get(KEY_DAY, null);
-let picksMode = store.get(KEY_MODE, false);
+let view = store.get(KEY_MODE, 'grid'); if (view === true) view = 'picks'; if (!['grid','picks','map'].includes(view)) view = 'grid';
+const picksMode = () => view === 'picks';
 // picks shared by a friend arrive in the URL as #p=id,id,...
 let friend = new Set();
 (() => { const m = location.hash.match(/p=([^&]+)/); if (!m) return;
@@ -238,7 +286,7 @@ function renderTabs(){
     b.onclick = () => { day = d.key; store.set(KEY_DAY, day); renderAll(); $('#grid').scrollTop = 0; };
     t.appendChild(b);
   });
-  const m = $('#mode'); m.classList.toggle('on', picksMode);
+  document.querySelectorAll('.view').forEach(b => b.classList.toggle('on', b.dataset.v === view));
 }
 
 // ---------- grid ----------
@@ -287,12 +335,13 @@ function toggle(id, el){
   store.set(KEY, [...picks]);
   if (el) el.classList.toggle('on', picks.has(id));
   if (navigator.vibrate) navigator.vibrate(8);
-  renderCount(); if (picksMode) renderList();
+  renderCount(); tickStrip(); if (picksMode()) renderList(); if (view === 'map') renderMap();
 }
 
 function renderCount(){
   const d = dayObj(); const n = d.acts.filter(a => picks.has(a.id)).length; const all = picks.size;
   $('#count').innerHTML = `<b>${n}</b> picked ${d.label.slice(0,3)}${all !== n ? ` · ${all} total` : ''}`;
+  $('#vc').textContent = n ? n : '';
 }
 
 // ---------- now line ----------
@@ -320,7 +369,24 @@ function tickStrip(){
     const cur = DATA.days.find(d => { const a = new Date(d.date + 'T12:00:00'); const b = new Date(a); b.setMinutes(b.getMinutes() + 51*15); return n >= a && n <= b; });
     if (!cur && next && (next - n) < 12*3600000) txt = `Day 2 starts in <b>${fmt(next - n)}</b>`;
   }
-  el.innerHTML = txt; el.classList.toggle('show', !!txt && !picksMode);
+  // Now & next, based on picks, while the selected day is live
+  const d = dayObj(); const ds = new Date(d.date + 'T12:00:00'); const nowq = (n - ds) / 900000;
+  el.classList.remove('nownext');
+  if (nowq >= -0.5 && nowq <= 51) {
+    const mine = d.acts.filter(a => picks.has(a.id)).sort((a,b) => a.start - b.start);
+    const on = mine.filter(a => a.start <= nowq && nowq < a.end);
+    const next = mine.find(a => a.start > nowq);
+    const one = a => `<em>${DATA.stages[a.stage]}</em> <b>${splitName(a.name).base}</b>`;
+    const parts = [];
+    on.slice(0, 2).forEach((a, i) => parts.push(`<span class="nn"><i>${i ? 'Also' : 'Now'}</i> ${one(a)}</span>`));
+    if (on.length > 2) parts.push(`<span class="nn"><i>+${on.length - 2} more</i></span>`);
+    if (next) { const mins = Math.round((next.start - nowq) * 15); parts.push(`<span class="nn"><i>Next</i> ${one(next)} <i>${mins <= 0 ? 'now' : mins < 60 ? `in ${mins} min` : `at ${tm(next.start)}`}</i></span>`); }
+    if (!mine.length) parts.push(`<span class="nn"><i>No picks yet</i> tap acts in the timetable to build your night</span>`);
+    else if (!on.length && !next) parts.push(`<span class="nn"><i>Done</i> that was your last pick — enjoy the rest of the night</span>`);
+    txt = parts.join(''); el.classList.add('nownext');
+  }
+  el.innerHTML = txt; el.classList.toggle('show', !!txt && !picksMode());
+  if (view === 'map' && !scrubbing) renderMap();
   // time of day backdrop (real clock, any day)
   const h = n.getHours() + n.getMinutes()/60;
   document.body.classList.remove('tod-day','tod-dusk','tod-night');
@@ -328,6 +394,58 @@ function tickStrip(){
 }
 setInterval(tickNow, 30000); setInterval(tickStrip, 30000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden) { tickNow(); tickStrip(); } });
+
+// ---------- map ----------
+// stage positions as fractions of the official 2026 map (1080x1350); label side per stage
+const MAP_IMG = 'https://cdn.sanity.io/images/ow8hsen7/production/93f2b2ebc605e4849617efccdc46553082013734-1080x1350.png?w=1080&fit=max&auto=format&q=80';
+// x/y = marker; lx/ly = label anchor, tf = label transform (keeps labels clear of each other and of the map's own text)
+const MAP_POS = [
+  {x:.500, y:.667, lx:.500, ly:.640, tf:'translate(-50%,-100%)'},  // 1 Strobe   – label above
+  {x:.208, y:.718, lx:.208, ly:.745, tf:'translateX(-50%)'},       // 2 Moon     – below
+  {x:.064, y:.611, lx:.040, ly:.640, tf:'none'},                   // 3 Aura     – below, hanging right
+  {x:.153, y:.329, lx:.120, ly:.302, tf:'translateY(-100%)'},      // 4 Forest Rave – above, hanging right
+  {x:.347, y:.456, lx:.347, ly:.429, tf:'translate(-50%,-100%)'},  // 5 The Pit  – above
+  {x:.631, y:.462, lx:.600, ly:.489, tf:'translateX(-50%)'},       // 6 Tunnel   – below
+];
+let scrubbing = false, scrubQ = 0;
+function liveQ(){ const d = dayObj(); return (new Date() - new Date(d.date + 'T12:00:00')) / 900000; }
+function renderMap(){
+  const d = dayObj(); const box = $('#map');
+  const lq = liveQ(); const isLive = lq >= 0 && lq <= 51;
+  const q = scrubbing ? scrubQ : (isLive ? lq : 0);
+  const at = si => d.acts.filter(a => a.stage === si).find(a => a.start <= q && q < a.end);
+  const after = si => d.acts.filter(a => a.stage === si && a.start > q).sort((a,b) => a.start - b.start)[0];
+  if (!box.dataset.built) {
+    box.innerHTML = `<div class="mapwrap" id="mapwrap"><img src="map.png" alt="Festival map" onerror="this.onerror=null;this.src='${MAP_IMG}'"></div>
+      <div class="scrub"><b id="scrubT"></b><input type="range" id="scrub" min="0" max="50" step="1"><button id="scrubNow" type="button">Now</button></div>
+      <div class="scrubhint" id="scrubhint"></div><div id="mrows"></div>`;
+    box.dataset.built = '1';
+    const inp = $('#scrub');
+    inp.oninput = () => { scrubbing = true; scrubQ = +inp.value; renderMap(); };
+    $('#scrubNow').onclick = () => { scrubbing = false; renderMap(); };
+  }
+  const wrap = $('#mapwrap'); wrap.querySelectorAll('.mk,.lb').forEach(e => e.remove());
+  $('#scrub').value = Math.min(50, Math.max(0, Math.floor(q)));
+  $('#scrubT').textContent = tm(Math.floor(Math.max(0, Math.min(50, q))));
+  const nb = $('#scrubNow'); nb.classList.toggle('live', isLive && !scrubbing); nb.style.display = isLive ? '' : 'none';
+  $('#scrubhint').textContent = isLive && !scrubbing ? 'Live — who is playing where right now. Drag to look ahead.' : `Showing ${d.label} at ${tm(Math.floor(q))} — drag the slider to move through the day.`;
+  const rows = $('#mrows'); rows.innerHTML = '';
+  DATA.stages.forEach((st, si) => {
+    const cur = at(si), nxt = after(si); const p = MAP_POS[si];
+    const isPick = cur && picks.has(cur.id);
+    const mk = document.createElement('div'); mk.className = 'mk' + (isPick ? ' pick' : '') + (isLive && !scrubbing && isPick ? ' live' : '');
+    mk.style.left = (p.x*100) + '%'; mk.style.top = (p.y*100) + '%'; mk.textContent = si + 1; wrap.appendChild(mk);
+    const lb = document.createElement('div'); lb.className = 'lb' + (isPick ? ' pick' : '') + (cur ? '' : ' dim');
+    lb.innerHTML = `<span class="st">${st}</span><span class="ar">${cur ? splitName(cur.name).base : (nxt ? `<small>${tm(nxt.start)}</small> ${splitName(nxt.name).base}` : '<small>closed</small>')}</span>`;
+    lb.style.left = (p.lx*100) + '%'; lb.style.top = (p.ly*100) + '%'; lb.style.transform = p.tf;
+    wrap.appendChild(lb);
+    const r = document.createElement('div'); r.className = 'mrow' + (isPick ? ' pick' : '');
+    r.innerHTML = `<div class="num">${si + 1}</div><div class="body"><div class="st">${st}</div>
+      <div class="ar">${cur ? nameHTML(cur.name) : '<span style="color:var(--fg2)">—</span>'}</div>
+      <div class="nx">${cur ? `<b>${tm(cur.start)}–${tm(cur.end)}</b>` : ''}${cur && nxt ? ' · ' : ''}${nxt ? `Next <b>${tm(nxt.start)}</b> ${splitName(nxt.name).base}${picks.has(nxt.id) ? ' ★' : ''}` : (cur ? ' · last act here' : 'Closed')}</div></div>`;
+    rows.appendChild(r);
+  });
+}
 
 // ---------- picks list ----------
 function renderList(){
@@ -375,16 +493,17 @@ function renderGridState(){ document.querySelectorAll('.act').forEach(el => el.c
 
 function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
 
-$('#mode').onclick = () => { picksMode = !picksMode; store.set(KEY_MODE, picksMode); document.body.classList.toggle('picks', picksMode); renderTabs(); renderFriend(); tickStrip(); if (picksMode) renderList(); };
+document.querySelectorAll('.view').forEach(b => b.onclick = () => { view = b.dataset.v; store.set(KEY_MODE, view); scrubbing = false; setViewClass(); renderTabs(); renderFriend(); tickStrip(); if (picksMode()) renderList(); if (view === 'map') renderMap(); });
+function setViewClass(){ document.body.classList.toggle('picks', view === 'picks'); document.body.classList.toggle('map', view === 'map'); }
 
 function renderFriend(){
   const fb = $('#friendbar'); const valid = [...friend].filter(id => byId[id]);
-  fb.classList.toggle('show', valid.length > 0 && !picksMode);
+  fb.classList.toggle('show', valid.length > 0 && !picksMode());
   if (valid.length) $('#friendtxt').textContent = `A friend shared ${valid.length} picks — outlined in blue.`;
 }
 $('#friendadd').onclick = () => { friend.forEach(id => { if (byId[id]) picks.add(id); }); store.set(KEY, [...picks]); friend = new Set(); renderAll(); toast('Added to your picks'); };
 $('#frienddismiss').onclick = () => { friend = new Set(); renderAll(); };
-function renderAll(){ document.body.classList.toggle('picks', picksMode); renderTabs(); renderGrid(); renderCount(); renderFriend(); tickStrip(); if (picksMode) renderList(); }
+function renderAll(){ setViewClass(); renderTabs(); renderGrid(); renderCount(); renderFriend(); tickStrip(); if (picksMode()) renderList(); if (view === 'map') renderMap(); }
 renderAll();
 
 // scroll the grid to "now" on festival days, otherwise to the top
