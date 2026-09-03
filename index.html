@@ -16,7 +16,7 @@
 :root{
   --bg:#1f3631; --bg-deep:#182b27; --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.06);
   --fg:#eeeeee; --fg2:#b9c6c1; --fg3:#7f918b;
-  --pill-dark:rgba(18,32,29,.72); --pill-light:rgba(190,200,195,.28); --pill-border:rgba(255,255,255,.14);
+  --pill-dark:rgba(18,32,29,.8); --pill-light:rgba(190,200,195,.3); --pill-border:rgba(255,255,255,.14);
   --chip:rgba(120,145,138,.45);
   --pick:#e9a75c; --pick-fg:#1a2b27; --pick-glow:rgba(233,167,92,.45);
   --now:#ff6a5c;
@@ -65,7 +65,9 @@ nav{display:flex;align-items:center;gap:8px;margin:10px 0 8px}
 .tab.on.today small::after{color:#c2402f}
 
 /* ---------- grid ---------- */
-#grid{flex:1;overflow:auto;position:relative;-webkit-overflow-scrolling:touch;
+#main{flex:1;position:relative;min-height:0}
+#grid,#list,#map{position:absolute;inset:0}
+#grid{overflow:auto;-webkit-overflow-scrolling:touch;
   scroll-padding-left:var(--tcol);scroll-snap-type:x proximity}
 .sheet{position:relative;display:grid;grid-template-columns:var(--tcol) repeat(6,var(--col));
   grid-template-rows:var(--head) calc(51 * var(--q));
@@ -82,7 +84,7 @@ nav{display:flex;align-items:center;gap:8px;margin:10px 0 8px}
 .col{position:relative;border-right:1px solid var(--line2);
   background:repeating-linear-gradient(to bottom,var(--line) 0,var(--line) 1px,transparent 1px,transparent calc(4 * var(--q)))}
 .act{position:absolute;left:3px;right:3px;border-radius:7px;background:var(--pill-dark);color:var(--fg);
-  border:1px solid var(--pill-border);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  border:1px solid var(--pill-border);
   padding:6px 8px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;gap:2px;
   cursor:pointer;transition:transform .08s}
 .col .act:nth-child(even){background:var(--pill-light)}
@@ -101,7 +103,7 @@ nav{display:flex;align-items:center;gap:8px;margin:10px 0 8px}
 .act.h1{justify-content:center;padding-top:0;padding-bottom:0}
 body.picks .act:not(.on){opacity:.22;filter:saturate(0)}
 /* ---------- map view ---------- */
-#map{flex:1;overflow:auto;display:none;padding:10px calc(var(--sar) + 14px) calc(var(--sab) + 30px) calc(var(--sal) + 14px)}
+#map{overflow:auto;display:none;padding:10px calc(var(--sar) + 14px) calc(var(--sab) + 30px) calc(var(--sal) + 14px)}
 .mapwrap{position:relative;width:100%;aspect-ratio:1080/1350;border-radius:10px;overflow:hidden;background:#1b302c;border:1px solid var(--pill-border)}
 .mapwrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .mk{position:absolute;transform:translate(-50%,-50%);width:22px;height:22px;border-radius:50%;background:rgba(238,238,238,.95);color:#1a2b27;
@@ -145,12 +147,12 @@ body.picks .act:not(.on){opacity:.22;filter:saturate(0)}
   padding:3px 0;transform:translateY(-50%);font-variant-numeric:tabular-nums;z-index:2}
 
 /* ---------- picks list ---------- */
-#list{flex:1;overflow:auto;display:none;padding:12px calc(var(--sar) + 14px) calc(var(--sab) + 30px) calc(var(--sal) + 14px)}
-body.picks #grid,body.map #grid{display:none} body.picks #list{display:block} body.map #map{display:block}
+#list{overflow:auto;display:none;padding:12px calc(var(--sar) + 14px) calc(var(--sab) + 30px) calc(var(--sal) + 14px)}
+body.picks #grid,body.map #grid{visibility:hidden;pointer-events:none} body.picks #list{display:block} body.map #map{display:block}
 .empty{color:var(--fg2);text-align:center;padding:60px 20px;font-size:15px;line-height:1.5}
 .empty b{color:var(--fg)}
 .row{display:flex;gap:12px;align-items:stretch;padding:10px 12px;margin-bottom:8px;border-radius:8px;background:var(--pill-dark);
-  border:1px solid var(--pill-border);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+  border:1px solid var(--pill-border)}
 .row .when{flex:none;width:52px;font-variant-numeric:tabular-nums;font-size:13px;font-weight:800;line-height:1.35}
 .row .when small{display:block;color:var(--fg2);font-weight:500;font-size:11.5px}
 .row .what{flex:1;min-width:0}
@@ -231,9 +233,11 @@ body.tod-night{background:
   <div class="friendbar" id="friendbar"><span id="friendtxt"></span><button id="friendadd" type="button">Add to mine</button><button class="ghost" id="frienddismiss" type="button">Hide</button></div>
 </header>
 
+<main id="main">
 <div id="grid"><div class="sheet" id="sheet"></div></div>
 <div id="list"></div>
 <div id="map"></div>
+</main>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -247,33 +251,39 @@ const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v);}catch(e){ return d; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
 };
-let picks = new Set(store.get(KEY, []));
+const _stored = store.get(KEY, []);
+let picks = new Set(Array.isArray(_stored) ? _stored : []);
 let day = store.get(KEY_DAY, null);
 let view = store.get(KEY_MODE, 'grid'); if (view === true) view = 'picks'; if (!['grid','picks','map'].includes(view)) view = 'grid';
 const picksMode = () => view === 'picks';
-// picks shared by a friend arrive in the URL as #p=id,id,...
-let friend = new Set();
-(() => { const m = location.hash.match(/p=([^&]+)/); if (!m) return;
-  const ids = m[1].split(',').filter(Boolean); const mine = store.get(KEY, []);
-  if (ids.length && ids.join() !== mine.join()) friend = new Set(ids);
-  history.replaceState(null, '', location.pathname); })();
 
 // pick today's day automatically on festival days
-const todayKey = (() => {
+const calcToday = () => {
   const n = new Date(); const h = n.getHours();
   // until 05:00 still counts as the previous festival day
   const d = new Date(n); if (h < 5) d.setDate(d.getDate() - 1);
   const iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   const f = DATA.days.find(x => x.date === iso); return f ? f.key : null;
-})();
-if (!day || !DATA.days.some(d => d.key === day)) day = todayKey || DATA.days[0].key;
+};
+let todayKey = calcToday();
+if (todayKey) day = todayKey; else if (!day || !DATA.days.some(d => d.key === day)) day = DATA.days[0].key;
 
 const $ = s => document.querySelector(s);
 const tm = q => { const m = 12*60 + q*15; return String(Math.floor(m/60)%24).padStart(2,'0') + ':' + String(m%60).padStart(2,'0'); };
 const splitName = n => { const m = n.match(/\s*\((LIVE|HYBRID)\)/i); return m ? {base: n.replace(m[0], '').replace(/\s{2,}/g, ' ').trim(), tag: m[1].toUpperCase()} : {base: n, tag: null}; };
-const nameHTML = n => { const p = splitName(n); const esc = t => t.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); return esc(p.base) + (p.tag ? `<span class="badge ${p.tag.toLowerCase()}">${p.tag}</span>` : ''); };
+const esc = t => t.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const nameHTML = n => { const p = splitName(n); return esc(p.base) + (p.tag ? `<span class="badge ${p.tag.toLowerCase()}">${p.tag}</span>` : ''); };
 const dayObj = () => DATA.days.find(d => d.key === day);
 const byId = {}; DATA.days.forEach(d => d.acts.forEach(a => byId[a.id] = {...a, day:d.key}));
+picks = new Set([...picks].filter(id => byId[id]));   // drop ids that no longer exist in the data
+if (picks.size !== (Array.isArray(_stored) ? _stored.length : 0)) store.set(KEY, [...picks]);
+// picks shared by a friend arrive in the URL as #p=id,id,...
+const KEY_FRIEND = 'dm26-friend';
+let friend = new Set((store.get(KEY_FRIEND, []) || []).filter(id => byId[id]));
+(() => { const m = location.hash.match(/p=([^&]+)/); if (!m) return;
+  const ids = m[1].split(',').filter(id => byId[id]); const mine = [...picks];
+  if (ids.length && ids.join() !== mine.join()) { friend = new Set(ids); store.set(KEY_FRIEND, ids); }
+  history.replaceState(null, '', location.pathname); })();
 
 // ---------- tabs ----------
 function renderTabs(){
@@ -283,7 +293,7 @@ function renderTabs(){
     b.className = 'tab' + (d.key === day ? ' on' : '') + (d.key === todayKey ? ' today' : '');
     const dt = new Date(d.date + 'T12:00:00');
     b.innerHTML = d.label + '<small>' + dt.getDate() + ' ' + dt.toLocaleString('en', {month:'short'}) + '</small>';
-    b.onclick = () => { day = d.key; store.set(KEY_DAY, day); renderAll(); $('#grid').scrollTop = 0; };
+    b.onclick = () => { day = d.key; store.set(KEY_DAY, day); scrubbing = false; renderAll(); $('#grid').scrollTop = 0; };
     t.appendChild(b);
   });
   document.querySelectorAll('.view').forEach(b => b.classList.toggle('on', b.dataset.v === view));
@@ -376,7 +386,7 @@ function tickStrip(){
     const mine = d.acts.filter(a => picks.has(a.id)).sort((a,b) => a.start - b.start);
     const on = mine.filter(a => a.start <= nowq && nowq < a.end);
     const next = mine.find(a => a.start > nowq);
-    const one = a => `<em>${DATA.stages[a.stage]}</em> <b>${splitName(a.name).base}</b>`;
+    const one = a => `<em>${DATA.stages[a.stage]}</em> <b>${esc(splitName(a.name).base)}</b>`;
     const parts = [];
     on.slice(0, 2).forEach((a, i) => parts.push(`<span class="nn"><i>${i ? 'Also' : 'Now'}</i> ${one(a)}</span>`));
     if (on.length > 2) parts.push(`<span class="nn"><i>+${on.length - 2} more</i></span>`);
@@ -393,7 +403,9 @@ function tickStrip(){
   document.body.classList.add(h >= 7 && h < 18.5 ? 'tod-day' : h >= 18.5 && h < 21 ? 'tod-dusk' : 'tod-night');
 }
 setInterval(tickNow, 30000); setInterval(tickStrip, 30000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) { tickNow(); tickStrip(); } });
+document.addEventListener('visibilitychange', () => { if (!document.hidden) {
+  const t = calcToday(); if (t && t !== todayKey) { todayKey = t; day = t; store.set(KEY_DAY, day); renderAll(); return; }   // woke up on a new festival day
+  tickNow(); tickStrip(); } });
 
 // ---------- map ----------
 // stage positions as fractions of the official 2026 map (1080x1350); label side per stage
@@ -416,8 +428,8 @@ function renderMap(){
   const at = si => d.acts.filter(a => a.stage === si).find(a => a.start <= q && q < a.end);
   const after = si => d.acts.filter(a => a.stage === si && a.start > q).sort((a,b) => a.start - b.start)[0];
   if (!box.dataset.built) {
-    box.innerHTML = `<div class="mapwrap" id="mapwrap"><img src="map.png" alt="Festival map" onerror="this.onerror=null;this.src='${MAP_IMG}'"></div>
-      <div class="scrub"><b id="scrubT"></b><input type="range" id="scrub" min="0" max="50" step="1"><button id="scrubNow" type="button">Now</button></div>
+    box.innerHTML = `<div class="mapwrap" id="mapwrap"><img src="${MAP_IMG}" alt="Festival map"></div>
+      <div class="scrub"><b id="scrubT"></b><input type="range" id="scrub" min="0" max="49" step="1"><button id="scrubNow" type="button">Now</button></div>
       <div class="scrubhint" id="scrubhint"></div><div id="mrows"></div>`;
     box.dataset.built = '1';
     const inp = $('#scrub');
@@ -436,13 +448,13 @@ function renderMap(){
     const mk = document.createElement('div'); mk.className = 'mk' + (isPick ? ' pick' : '') + (isLive && !scrubbing && isPick ? ' live' : '');
     mk.style.left = (p.x*100) + '%'; mk.style.top = (p.y*100) + '%'; mk.textContent = si + 1; wrap.appendChild(mk);
     const lb = document.createElement('div'); lb.className = 'lb' + (isPick ? ' pick' : '') + (cur ? '' : ' dim');
-    lb.innerHTML = `<span class="st">${st}</span><span class="ar">${cur ? splitName(cur.name).base : (nxt ? `<small>${tm(nxt.start)}</small> ${splitName(nxt.name).base}` : '<small>closed</small>')}</span>`;
+    lb.innerHTML = `<span class="st">${st}</span><span class="ar">${cur ? esc(splitName(cur.name).base) : (nxt ? `<small>${tm(nxt.start)}</small> ${esc(splitName(nxt.name).base)}` : '<small>closed</small>')}</span>`;
     lb.style.left = (p.lx*100) + '%'; lb.style.top = (p.ly*100) + '%'; lb.style.transform = p.tf;
     wrap.appendChild(lb);
     const r = document.createElement('div'); r.className = 'mrow' + (isPick ? ' pick' : '');
     r.innerHTML = `<div class="num">${si + 1}</div><div class="body"><div class="st">${st}</div>
       <div class="ar">${cur ? nameHTML(cur.name) : '<span style="color:var(--fg2)">—</span>'}</div>
-      <div class="nx">${cur ? `<b>${tm(cur.start)}–${tm(cur.end)}</b>` : ''}${cur && nxt ? ' · ' : ''}${nxt ? `Next <b>${tm(nxt.start)}</b> ${splitName(nxt.name).base}${picks.has(nxt.id) ? ' ★' : ''}` : (cur ? ' · last act here' : 'Closed')}</div></div>`;
+      <div class="nx">${cur ? `<b>${tm(cur.start)}–${tm(cur.end)}</b>` : ''}${cur && nxt ? ' · ' : ''}${nxt ? `Next <b>${tm(nxt.start)}</b> ${esc(splitName(nxt.name).base)}${picks.has(nxt.id) ? ' ★' : ''}` : (cur ? ' · last act here' : 'Closed')}</div></div>`;
     rows.appendChild(r);
   });
 }
@@ -493,24 +505,28 @@ function renderGridState(){ document.querySelectorAll('.act').forEach(el => el.c
 
 function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
 
-document.querySelectorAll('.view').forEach(b => b.onclick = () => { view = b.dataset.v; store.set(KEY_MODE, view); scrubbing = false; setViewClass(); renderTabs(); renderFriend(); tickStrip(); if (picksMode()) renderList(); if (view === 'map') renderMap(); });
+document.querySelectorAll('.view').forEach(b => b.onclick = () => { view = b.dataset.v; store.set(KEY_MODE, view); scrubbing = false; setViewClass(); renderTabs(); renderFriend(); tickStrip(); if (picksMode()) renderList(); if (view === 'map') renderMap(); if (typeof scrollToNow === 'function') scrollToNow(); });
 function setViewClass(){ document.body.classList.toggle('picks', view === 'picks'); document.body.classList.toggle('map', view === 'map'); }
 
 function renderFriend(){
   const fb = $('#friendbar'); const valid = [...friend].filter(id => byId[id]);
   fb.classList.toggle('show', valid.length > 0 && !picksMode());
-  if (valid.length) $('#friendtxt').textContent = `A friend shared ${valid.length} picks — outlined in blue.`;
+  if (valid.length) $('#friendtxt').textContent = `A friend shared ${valid.length} picks — outlined in blue.` + (navigator.standalone ? '' : ' (You are in Safari: picks added here stay in Safari, not in the home-screen app.)');
 }
-$('#friendadd').onclick = () => { friend.forEach(id => { if (byId[id]) picks.add(id); }); store.set(KEY, [...picks]); friend = new Set(); renderAll(); toast('Added to your picks'); };
-$('#frienddismiss').onclick = () => { friend = new Set(); renderAll(); };
+$('#friendadd').onclick = () => { friend.forEach(id => { if (byId[id]) picks.add(id); }); store.set(KEY, [...picks]); friend = new Set(); store.set(KEY_FRIEND, []); renderAll(); toast('Added to your picks'); };
+$('#frienddismiss').onclick = () => { friend = new Set(); store.set(KEY_FRIEND, []); renderAll(); };
 function renderAll(){ setViewClass(); renderTabs(); renderGrid(); renderCount(); renderFriend(); tickStrip(); if (picksMode()) renderList(); if (view === 'map') renderMap(); }
 renderAll();
 
+// warm the map image so the offline cache has it even if the Map tab is never opened online
+window.addEventListener('load', () => { const i = new Image(); i.src = MAP_IMG; });
 // offline: cache the app on the phone so it works without signal in the forest
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); }); }
 
-// scroll the grid to "now" on festival days, otherwise to the top
-(() => { const el = $('#now'); if (el && el.style.display === 'block') $('#grid').scrollTop = Math.max(0, parseFloat(el.style.top) - 160); })();
+// scroll the grid to "now" on festival days (once, the first time the grid is shown)
+let scrolledToNow = false;
+function scrollToNow(){ if (scrolledToNow || view !== 'grid') return; const el = $('#now'); if (el && el.style.display === 'block') $('#grid').scrollTop = Math.max(0, parseFloat(el.style.top) - 160); scrolledToNow = true; }
+scrollToNow();
 </script>
 </body>
 </html>
