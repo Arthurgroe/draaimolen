@@ -511,13 +511,16 @@ function renderList(){
     box.appendChild(r);
   });
   const act = document.createElement('div'); act.className = 'actions';
-  act.innerHTML = `<button class="btn" id="share" type="button">Share ${d.label}</button><button class="btn warn" id="clear" type="button">Clear ${d.label}</button>`;
+  act.innerHTML = `<button class="btn" id="share" type="button">Share picks</button><button class="btn warn" id="clear" type="button">Clear ${d.label}</button>`;
   box.appendChild(act);
   const act2 = document.createElement('div'); act2.className = 'actions'; act2.style.marginTop = '8px';
   act2.innerHTML = `<button class="btn" id="import" type="button">Import picks from a link</button>`;
   box.appendChild(act2); $('#import').onclick = importFromClipboard;
   $('#share').onclick = () => {
-    const txt = `Draaimolen ${d.label} – my picks\n` + mine.map(a => `${tm(a.start)}–${tm(a.end)}  ${a.name}  @ ${DATA.stages[a.stage]}`).join('\n');
+    const txt = 'Draaimolen 2026 – my picks\n' + DATA.days.map(dd => {
+      const list = dd.acts.filter(a => picks.has(a.id)).sort((a,b) => a.start - b.start || a.stage - b.stage);
+      return list.length ? `\n${dd.label}\n` + list.map(a => `${tm(a.start)}–${tm(a.end)}  ${a.name}  @ ${DATA.stages[a.stage]}`).join('\n') : '';
+    }).join('\n');
     const url = location.origin + location.pathname + '#p=' + [...picks].join(',');
     const full = txt + '\n\nSee them on the timetable (or import them in the app):\n' + url;
     if (navigator.share) navigator.share({text: full}).catch(()=>{});
