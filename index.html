@@ -452,7 +452,7 @@ function renderMap(){
   const at = si => d.acts.filter(a => a.stage === si).find(a => a.start <= q && q < a.end);
   const after = si => d.acts.filter(a => a.stage === si && a.start > q).sort((a,b) => a.start - b.start)[0];
   if (!box.dataset.built) {
-    box.innerHTML = `<div class="mapwrap" id="mapwrap"><img src="${MAP_IMG}" alt="Festival map"></div>
+    box.innerHTML = `<div class="mapwrap" id="mapwrap"><img src="map.png" alt="Festival map" onerror="this.onerror=null;this.src='${MAP_IMG}'"></div>
       <div class="scrub"><b id="scrubT"></b><input type="range" id="scrub" min="0" max="49" step="1"><button id="scrubNow" type="button">Now</button></div>
       <div class="scrubhint" id="scrubhint"></div><div id="mrows"></div>`;
     box.dataset.built = '1';
@@ -543,7 +543,7 @@ function renderAll(){ setViewClass(); renderTabs(); renderGrid(); renderCount();
 renderAll();
 
 // warm the map image so the offline cache has it even if the Map tab is never opened online
-window.addEventListener('load', () => { const i = new Image(); i.src = MAP_IMG; });
+window.addEventListener('load', () => { const i = new Image(); i.onerror = () => { i.onerror = null; i.src = MAP_IMG; }; i.src = 'map.png'; });
 // offline: cache the app on the phone so it works without signal in the forest
 if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); }); }
 
