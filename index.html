@@ -519,8 +519,9 @@ function renderList(){
   $('#share').onclick = () => {
     const txt = `Draaimolen ${d.label} – my picks\n` + mine.map(a => `${tm(a.start)}–${tm(a.end)}  ${a.name}  @ ${DATA.stages[a.stage]}`).join('\n');
     const url = location.origin + location.pathname + '#p=' + [...picks].join(',');
-    if (navigator.share) navigator.share({text: txt + '\n\nSee them on the timetable:', url}).catch(()=>{});
-    else if (navigator.clipboard) navigator.clipboard.writeText(txt + '\n' + url).then(() => toast('Copied to clipboard'));
+    const full = txt + '\n\nSee them on the timetable (or import them in the app):\n' + url;
+    if (navigator.share) navigator.share({text: full}).catch(()=>{});
+    else if (navigator.clipboard) navigator.clipboard.writeText(full).then(() => toast('Copied to clipboard'));
   };
   $('#clear').onclick = () => {
     if (!confirm(`Remove all ${mine.length} picks for ${d.label}?`)) return;
@@ -535,7 +536,8 @@ function importPicks(text){
   const m = (text || '').match(/p=([A-Za-z0-9,\-]+)/); const ids = (m ? m[1] : text || '').split(',').map(t => t.trim()).filter(id => byId[id]);
   if (!ids.length) { toast('No picks found in that link'); return; }
   const before = picks.size; ids.forEach(id => picks.add(id)); store.set(KEY, [...picks]);
-  renderAll(); toast(`Added ${picks.size - before} pick${picks.size - before === 1 ? '' : 's'}`);
+  renderAll(); const n = picks.size - before;
+  toast(n ? `Added ${n} pick${n === 1 ? '' : 's'}` : `All ${ids.length} picks in that link are already yours`);
 }
 async function importFromClipboard(){
   let text = '';
