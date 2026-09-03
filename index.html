@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Draaimolen 2026</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Draaimolen">
+<meta name="theme-color" content="#24403a">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<style>
+:root{
+  --bg:#1f3631; --bg-deep:#182b27; --line:rgba(255,255,255,.10); --line2:rgba(255,255,255,.06);
+  --fg:#eeeeee; --fg2:#b9c6c1; --fg3:#7f918b;
+  --pill-dark:rgba(18,32,29,.72); --pill-light:rgba(190,200,195,.28); --pill-border:rgba(255,255,255,.14);
+  --chip:rgba(120,145,138,.45);
+  --pick:#e9a75c; --pick-fg:#1a2b27; --pick-glow:rgba(233,167,92,.45);
+  --now:#ff6a5c;
+  --tcol:46px; --col:150px; --q:17px; --head:44px;
+  --sat:env(safe-area-inset-top); --sab:env(safe-area-inset-bottom);
+  --sal:env(safe-area-inset-left); --sar:env(safe-area-inset-right);
+  --glow:0 0 8px rgba(255,255,255,.28);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--fg);
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Inter,system-ui,sans-serif;
+  -webkit-text-size-adjust:100%;overscroll-behavior:none}
+body{position:fixed;inset:0;display:flex;flex-direction:column;-webkit-user-select:none;user-select:none;
+  background:
+    radial-gradient(60% 40% at 78% 22%, rgba(150,80,60,.55), transparent 70%),
+    radial-gradient(45% 35% at 62% 38%, rgba(170,150,70,.45), transparent 70%),
+    radial-gradient(50% 45% at 88% 60%, rgba(110,120,60,.35), transparent 70%),
+    radial-gradient(40% 30% at 30% 85%, rgba(90,130,110,.35), transparent 70%),
+    linear-gradient(180deg,#24403a 0%,#1f3631 45%,#182b27 100%);
+  background-attachment:fixed}
+
+/* ---------- top bar ---------- */
+header{flex:none;padding:calc(var(--sat) + 10px) calc(var(--sar) + 14px) 0 calc(var(--sal) + 14px);
+  background:rgba(95,113,110,.35);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-bottom:1px solid var(--line)}
+.title{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.title h1{margin:0;font-size:18px;font-weight:800;letter-spacing:.02em;text-shadow:var(--glow)}
+.title h1 span{color:var(--fg)}
+.count{font-size:12px;color:var(--fg2);font-variant-numeric:tabular-nums}
+.count b{color:var(--pick);font-weight:700}
+nav{display:flex;align-items:center;gap:8px;margin:10px 0 10px}
+.tabs{display:flex;gap:6px;flex:1}
+.tab{flex:1;border:1px solid var(--pill-border);background:var(--pill-dark);color:var(--fg);font:inherit;font-size:14px;font-weight:700;
+  padding:9px 6px;border-radius:8px;line-height:1.1;letter-spacing:.02em;text-shadow:var(--glow)}
+.tab small{display:block;font-size:10.5px;font-weight:500;color:var(--fg2);margin-top:2px;letter-spacing:.04em;text-shadow:none}
+.tab.on{background:rgba(238,238,238,.92);color:#1a2b27;text-shadow:none;border-color:transparent}
+.tab.on small{color:#4d5f5a}
+.tab.today small::after{content:" · today";color:var(--now)}
+.tab.on.today small::after{color:#c2402f}
+.mode{flex:none;border:1px solid var(--pill-border);background:var(--pill-dark);color:var(--fg);font:inherit;font-size:13px;
+  font-weight:700;padding:9px 12px;border-radius:8px;height:52px;display:flex;align-items:center;gap:6px;text-shadow:var(--glow)}
+.mode .dot{width:8px;height:8px;border-radius:50%;background:var(--pick)}
+.mode.on{background:var(--pick);color:var(--pick-fg);border-color:transparent;text-shadow:none;box-shadow:0 0 16px var(--pick-glow)}
+.mode.on .dot{background:var(--pick-fg)}
+
+/* ---------- grid ---------- */
+#grid{flex:1;overflow:auto;position:relative;-webkit-overflow-scrolling:touch;
+  scroll-padding-left:var(--tcol);scroll-snap-type:x proximity}
+.sheet{position:relative;display:grid;grid-template-columns:var(--tcol) repeat(6,var(--col));
+  grid-template-rows:var(--head) calc(51 * var(--q));
+  width:max-content;padding-right:calc(var(--sar) + 16px);padding-bottom:calc(var(--sab) + 24px)}
+.corner{position:sticky;top:0;left:0;z-index:5;background:#213833;
+  border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+.stage{position:sticky;top:0;z-index:3;background:#213833;
+  border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 10px;font-size:12.5px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;text-shadow:var(--glow);scroll-snap-align:start}
+.stage i{display:none}
+.times{position:sticky;left:0;z-index:4;background:#213833;border-right:1px solid var(--line)}
+.t{position:absolute;right:5px;font-size:10px;font-weight:600;color:var(--fg);background:var(--chip);padding:2px 4px;border-radius:3px;
+  font-variant-numeric:tabular-nums;transform:translateY(-50%);line-height:1}
+.col{position:relative;border-right:1px solid var(--line2);
+  background:repeating-linear-gradient(to bottom,var(--line) 0,var(--line) 1px,transparent 1px,transparent calc(4 * var(--q)))}
+.act{position:absolute;left:3px;right:3px;border-radius:7px;background:var(--pill-dark);color:var(--fg);
+  border:1px solid var(--pill-border);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  padding:6px 8px;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-start;gap:2px;
+  cursor:pointer;transition:transform .08s}
+.col .act:nth-child(even){background:var(--pill-light)}
+.act:active{transform:scale(.97)}
+.act .n{font-size:12.5px;font-weight:800;line-height:1.2;letter-spacing:.02em;text-transform:uppercase;text-shadow:var(--glow);
+  display:-webkit-box;-webkit-line-clamp:var(--lines,3);-webkit-box-orient:vertical;overflow:hidden}
+.act .tm{font-size:10.5px;color:var(--fg2);font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.act.on,.col .act.on:nth-child(even){background:var(--pick);color:var(--pick-fg);border-color:transparent;box-shadow:0 0 18px var(--pick-glow)}
+.act.on .n{text-shadow:none}
+.act.on .tm{color:#4a3a22}
+.act.on::after{content:"✓";position:absolute;right:7px;top:5px;font-size:12px;font-weight:800}
+.act.on .n{padding-right:12px}
+.act.h1{--lines:1}.act.h2{--lines:2}
+.act.h1 .tm,.act.h2 .tm{display:none}
+.act.h3{--lines:2}
+.act.h1{justify-content:center;padding-top:0;padding-bottom:0}
+body.picks .act:not(.on){opacity:.22;filter:saturate(0)}
+.nowline{position:absolute;left:0;right:0;height:0;border-top:2px solid var(--now);z-index:2;pointer-events:none;display:none}
+.nowline::before{content:"";position:absolute;left:var(--tcol);top:-5px;width:8px;height:8px;border-radius:50%;background:var(--now);margin-left:-4px}
+.nowlbl{position:absolute;left:0;right:0;display:none;background:var(--now);color:#fff;font-size:10.5px;font-weight:800;text-align:center;
+  padding:3px 0;transform:translateY(-50%);font-variant-numeric:tabular-nums;z-index:2}
+
+/* ---------- picks list ---------- */
+#list{flex:1;overflow:auto;display:none;padding:12px calc(var(--sar) + 14px) calc(var(--sab) + 30px) calc(var(--sal) + 14px)}
+body.picks #grid{display:none} body.picks #list{display:block}
+.empty{color:var(--fg2);text-align:center;padding:60px 20px;font-size:15px;line-height:1.5}
+.empty b{color:var(--fg)}
+.row{display:flex;gap:12px;align-items:stretch;padding:10px 12px;margin-bottom:8px;border-radius:8px;background:var(--pill-dark);
+  border:1px solid var(--pill-border);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+.row .when{flex:none;width:52px;font-variant-numeric:tabular-nums;font-size:13px;font-weight:800;line-height:1.35}
+.row .when small{display:block;color:var(--fg2);font-weight:500;font-size:11.5px}
+.row .what{flex:1;min-width:0}
+.row .what .n{font-weight:800;font-size:14px;line-height:1.25;text-transform:uppercase;text-shadow:var(--glow);letter-spacing:.02em}
+.row .what .s{font-size:11px;color:var(--fg2);margin-top:4px;letter-spacing:.08em;text-transform:uppercase;display:flex;align-items:center;gap:6px}
+.row .what .s i{display:none}
+.clash{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--now);border:1px solid var(--now);
+  border-radius:4px;padding:1px 5px;margin-left:4px;vertical-align:middle;text-transform:uppercase}
+.row .x{flex:none;align-self:center;border:1px solid var(--pill-border);background:rgba(255,255,255,.08);color:var(--fg);width:32px;height:32px;border-radius:50%;font-size:16px;line-height:30px;text-align:center;padding:0}
+.actions{display:flex;gap:8px;margin-top:18px}
+.btn{flex:1;border:1px solid var(--pill-border);background:var(--pill-dark);color:var(--fg);font:inherit;font-size:13.5px;font-weight:700;padding:12px;border-radius:8px;text-shadow:var(--glow)}
+.btn.warn{color:var(--now);text-shadow:none}
+.hint{color:var(--fg3);font-size:11.5px;text-align:center;margin-top:16px;line-height:1.5}
+.toast{position:fixed;left:50%;bottom:calc(var(--sab) + 24px);transform:translate(-50%,20px);background:var(--fg);color:var(--bg);
+  padding:10px 16px;border-radius:8px;font-size:13.5px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:9}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+</style>
+</head>
+<body>
+<header>
+  <div class="title"><h1>Draaimolen ’26</h1><div class="count" id="count"></div></div>
+  <nav>
+    <div class="tabs" id="tabs"></div>
+    <button class="mode" id="mode" type="button"><span class="dot"></span>My picks</button>
+  </nav>
+</header>
+
+<div id="grid"><div class="sheet" id="sheet"></div></div>
+<div id="list"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DATA = {"stages":["STROBE","MOON","AURA","FOREST RAVE","THE PIT","TUNNEL"],"days":[{"key":"fri","label":"Friday","date":"2026-09-04","acts":[{"id":"fri-0-0","stage":0,"start":0,"end":10,"name":"LOLA EDO","t":"12:00–14:30"},{"id":"fri-0-10","stage":0,"start":10,"end":18,"name":"MI-EL B2B SOFT BREAK","t":"14:30–16:30"},{"id":"fri-0-18","stage":0,"start":18,"end":26,"name":"LEONCE B2B OCEANIC","t":"16:30–18:30"},{"id":"fri-0-26","stage":0,"start":26,"end":29,"name":"NAMASENDA (LIVE)","t":"18:30–19:15"},{"id":"fri-0-29","stage":0,"start":29,"end":38,"name":"ANGEL D'LITE B2B KIM ANN FOXMAN","t":"19:15–21:30"},{"id":"fri-0-38","stage":0,"start":38,"end":42,"name":"SHYGIRL (LIVE)","t":"21:30–22:30"},{"id":"fri-0-42","stage":0,"start":42,"end":50,"name":"THE SECRET GUEST","t":"22:30–00:30"},{"id":"fri-1-4","stage":1,"start":4,"end":9,"name":"THE NECKS (LIVE) SET 1","t":"13:00–14:15"},{"id":"fri-1-11","stage":1,"start":11,"end":16,"name":"THE NECKS (LIVE) SET 2","t":"14:45–16:00"},{"id":"fri-1-16","stage":1,"start":16,"end":20,"name":"COLA REN & K-LONE (LIVE)","t":"16:00–17:00"},{"id":"fri-1-20","stage":1,"start":20,"end":28,"name":"COSMO B2B MARIE K","t":"17:00–19:00"},{"id":"fri-1-28","stage":1,"start":28,"end":36,"name":"KEVIN SAUNDERSON B2B SURUSINGHE","t":"19:00–21:00"},{"id":"fri-1-36","stage":1,"start":36,"end":42,"name":"DATAPUNK (HYBRID) PRESENTED BY ANTHONY ROTHER","t":"21:00–22:30"},{"id":"fri-1-42","stage":1,"start":42,"end":50,"name":"CARL H B2B NAONE","t":"22:30–00:30"},{"id":"fri-2-0","stage":2,"start":0,"end":12,"name":"ANNEBEL B2B CARRÉ","t":"12:00–15:00"},{"id":"fri-2-12","stage":2,"start":12,"end":16,"name":"OJOO (HYBRID)","t":"15:00–16:00"},{"id":"fri-2-16","stage":2,"start":16,"end":19,"name":"DIALS (LIVE)","t":"16:00–16:45"},{"id":"fri-2-19","stage":2,"start":19,"end":28,"name":"SHANNEN SP","t":"16:45–19:00"},{"id":"fri-2-28","stage":2,"start":28,"end":32,"name":"JAMES K (LIVE)","t":"19:00–20:00"},{"id":"fri-2-32","stage":2,"start":32,"end":40,"name":"DJ FIRMEZA X DJ LYCOX X DJ NARCISO","t":"20:00–22:00"},{"id":"fri-2-40","stage":2,"start":40,"end":44,"name":"COMMODO X HANS ARSEN (LIVE)","t":"22:00–23:00"},{"id":"fri-2-44","stage":2,"start":44,"end":50,"name":"RE:NI B2B SIMO CELL","t":"23:00–00:30"},{"id":"fri-3-0","stage":3,"start":0,"end":10,"name":"HARRISON HEAT","t":"12:00–14:30"},{"id":"fri-3-10","stage":3,"start":10,"end":16,"name":"MICHELLE MANETTI","t":"14:30–16:00"},{"id":"fri-3-16","stage":3,"start":16,"end":22,"name":"COLORED CRAIG","t":"16:00–17:30"},{"id":"fri-3-22","stage":3,"start":22,"end":28,"name":"DIMITRI","t":"17:30–19:00"},{"id":"fri-3-28","stage":3,"start":28,"end":36,"name":"DJ NOBU","t":"19:00–21:00"},{"id":"fri-3-36","stage":3,"start":36,"end":44,"name":"ERIS DREW B2B OBJEKT","t":"21:00–23:00"},{"id":"fri-3-44","stage":3,"start":44,"end":50,"name":"INTROSPEKT B2B JEREMY SYLVESTER","t":"23:00–00:30"},{"id":"fri-4-0","stage":4,"start":0,"end":8,"name":"COLOMBIAN DRONE MAFIA & DEBIT (HYBRID)","t":"12:00–14:00"},{"id":"fri-4-8","stage":4,"start":8,"end":12,"name":"NADAH EL SHAZLY FT. 3PHAZ (LIVE)","t":"14:00–15:00"},{"id":"fri-4-12","stage":4,"start":12,"end":16,"name":"KELMAN DURAN (LIVE)","t":"15:00–16:00"},{"id":"fri-4-16","stage":4,"start":16,"end":28,"name":"WHEEL OF FORTUNE (CCL X MARYLOU X NONO GIGSTA X RROXYMORE)","t":"16:00–19:00"},{"id":"fri-4-28","stage":4,"start":28,"end":34,"name":"WEIRD BAILE","t":"19:00–20:30"},{"id":"fri-4-34","stage":4,"start":34,"end":38,"name":"HYPERVERBENA (HYBRID)","t":"20:30–21:30"},{"id":"fri-4-38","stage":4,"start":38,"end":44,"name":"DJRUM X RIKO DAN","t":"21:30–23:00"},{"id":"fri-4-44","stage":4,"start":44,"end":50,"name":"LOW JACK B2B R3IGN DROPS","t":"23:00–00:30"},{"id":"fri-5-0","stage":5,"start":0,"end":12,"name":"VARUNA AGOSTI","t":"12:00–15:00"},{"id":"fri-5-12","stage":5,"start":12,"end":16,"name":"EVERSINES (LIVE)","t":"15:00–16:00"},{"id":"fri-5-16","stage":5,"start":16,"end":24,"name":"ISABEL SOTO B2B JIN SYNTH","t":"16:00–18:00"},{"id":"fri-5-24","stage":5,"start":24,"end":28,"name":"DOLTZ. (LIVE)","t":"18:00–19:00"},{"id":"fri-5-28","stage":5,"start":28,"end":36,"name":"DARWIN B2B MAMA SNAKE","t":"19:00–21:00"},{"id":"fri-5-36","stage":5,"start":36,"end":42,"name":"THE SECRET LIVE ACT","t":"21:00–22:30"},{"id":"fri-5-42","stage":5,"start":42,"end":50,"name":"TALISMANN B2B WALLIS","t":"22:30–00:30"}]},{"key":"sat","label":"Saturday","date":"2026-09-05","acts":[{"id":"sat-0-0","stage":0,"start":0,"end":18,"name":"BENNET B2B BESTE HIRA","t":"12:00–16:30"},{"id":"sat-0-18","stage":0,"start":18,"end":22,"name":"DEETRON (LIVE)","t":"16:30–17:30"},{"id":"sat-0-22","stage":0,"start":22,"end":32,"name":"DONATO DOZZY B2B JOB JOBSE","t":"17:30–20:00"},{"id":"sat-0-32","stage":0,"start":32,"end":36,"name":"NENE H (LIVE)","t":"20:00–21:00"},{"id":"sat-0-36","stage":0,"start":36,"end":42,"name":"DJ G2G B2B SPFDJ","t":"21:00–22:30"},{"id":"sat-0-42","stage":0,"start":42,"end":50,"name":"LENA WILLIKENS B2B ¥ØU$UK€ ¥UK1MAT$U","t":"22:30–00:30"},{"id":"sat-1-0","stage":1,"start":0,"end":14,"name":"CARMEN VILLAIN B2B HITAM","t":"12:00–15:30"},{"id":"sat-1-14","stage":1,"start":14,"end":18,"name":"BEN VINCE (LIVE)","t":"15:30–16:30"},{"id":"sat-1-18","stage":1,"start":18,"end":28,"name":"FULL CIRCLE","t":"16:30–19:00"},{"id":"sat-1-28","stage":1,"start":28,"end":32,"name":"ADAM MARSHALL & RICARDO TOBAR PRESENT LABRADOR (LIVE)","t":"19:00–20:00"},{"id":"sat-1-32","stage":1,"start":32,"end":40,"name":"ANDRÉ GALLUZZI B2B LEA OCCHI","t":"20:00–22:00"},{"id":"sat-1-40","stage":1,"start":40,"end":44,"name":"OK EG (LIVE)","t":"22:00–23:00"},{"id":"sat-1-44","stage":1,"start":44,"end":50,"name":"ADIEL B2B GARÇON","t":"23:00–00:30"},{"id":"sat-2-0","stage":2,"start":0,"end":18,"name":"BATU","t":"12:00–16:30"},{"id":"sat-2-18","stage":2,"start":18,"end":22,"name":"DEVON REXI MEETS JOHN T. GAST (LIVE)","t":"16:30–17:30"},{"id":"sat-2-22","stage":2,"start":22,"end":30,"name":"EMA B2B VERITY","t":"17:30–19:30"},{"id":"sat-2-30","stage":2,"start":30,"end":34,"name":"METRIST (LIVE)","t":"19:30–20:30"},{"id":"sat-2-34","stage":2,"start":34,"end":40,"name":"GOTH-TRAD","t":"20:30–22:00"},{"id":"sat-2-40","stage":2,"start":40,"end":44,"name":"POLYGONIA, SIMON POPP (LIVE)","t":"22:00–23:00"},{"id":"sat-2-44","stage":2,"start":44,"end":50,"name":"FADI MOHEM B2B RICHARD AKINGBEHIN","t":"23:00–00:30"},{"id":"sat-3-0","stage":3,"start":0,"end":8,"name":"RUMI DE BAIRES","t":"12:00–14:00"},{"id":"sat-3-8","stage":3,"start":8,"end":16,"name":"GARAGE GIRLS","t":"14:00–16:00"},{"id":"sat-3-16","stage":3,"start":16,"end":24,"name":"ĀBNAMĀ B2B FAITED","t":"16:00–18:00"},{"id":"sat-3-24","stage":3,"start":24,"end":32,"name":"BASHKKA B2B JEROME SYDENHAM","t":"18:00–20:00"},{"id":"sat-3-32","stage":3,"start":32,"end":36,"name":"FRED P (LIVE)","t":"20:00–21:00"},{"id":"sat-3-36","stage":3,"start":36,"end":44,"name":"OCTO OCTA B2B VIRGINIA","t":"21:00–23:00"},{"id":"sat-3-44","stage":3,"start":44,"end":50,"name":"SANDRIEN","t":"23:00–00:30"},{"id":"sat-4-0","stage":4,"start":0,"end":10,"name":"DJ LOMALINDA B2B PHILLIP JONDO","t":"12:00–14:30"},{"id":"sat-4-10","stage":4,"start":10,"end":18,"name":"MMM","t":"14:30–16:30"},{"id":"sat-4-18","stage":4,"start":18,"end":22,"name":"DJ HARAM & SHA RAY (LIVE)","t":"16:30–17:30"},{"id":"sat-4-22","stage":4,"start":22,"end":26,"name":"DJ RAMON SUCESSO","t":"17:30–18:30"},{"id":"sat-4-26","stage":4,"start":26,"end":30,"name":"FRENCH II (LIVE)","t":"18:30–19:30"},{"id":"sat-4-30","stage":4,"start":30,"end":36,"name":"DNGDNGDNG & PHRAN: SONIDO UNDERGROUND (HYBRID)","t":"19:30–21:00"},{"id":"sat-4-36","stage":4,"start":36,"end":44,"name":"BITTER BABE B2B CARISTA","t":"21:00–23:00"},{"id":"sat-4-44","stage":4,"start":44,"end":50,"name":"DJ PLAYERO","t":"23:00–00:30"},{"id":"sat-5-0","stage":5,"start":0,"end":10,"name":"RÆZA","t":"12:00–14:30"},{"id":"sat-5-10","stage":5,"start":10,"end":18,"name":"MARI SAKURAI","t":"14:30–16:30"},{"id":"sat-5-18","stage":5,"start":18,"end":26,"name":"DELANO LEGITO B2B SHINEDOE","t":"16:30–18:30"},{"id":"sat-5-26","stage":5,"start":26,"end":34,"name":"ROD B2B ROLANDO","t":"18:30–20:30"},{"id":"sat-5-34","stage":5,"start":34,"end":38,"name":"ALTINBAS (LIVE)","t":"20:30–21:30"},{"id":"sat-5-38","stage":5,"start":38,"end":42,"name":"KANGDING RAY X LUMUS PRESENT SNELWEG (LIVE)","t":"21:30–22:30"},{"id":"sat-5-42","stage":5,"start":42,"end":50,"name":"AMORAL B2B JASMÍN","t":"22:30–00:30"}]}]};
+const Q = 17;                                  // px per 15 minutes
+const KEY = 'dm26-picks', KEY_DAY = 'dm26-day', KEY_MODE = 'dm26-mode';
+
+// ---------- persistence (localStorage, guarded) ----------
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v);}catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let picks = new Set(store.get(KEY, []));
+let day = store.get(KEY_DAY, null);
+let picksMode = store.get(KEY_MODE, false);
+
+// pick today's day automatically on festival days
+const todayKey = (() => {
+  const n = new Date(); const h = n.getHours();
+  // until 05:00 still counts as the previous festival day
+  const d = new Date(n); if (h < 5) d.setDate(d.getDate() - 1);
+  const iso = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  const f = DATA.days.find(x => x.date === iso); return f ? f.key : null;
+})();
+if (!day || !DATA.days.some(d => d.key === day)) day = todayKey || DATA.days[0].key;
+
+const $ = s => document.querySelector(s);
+const tm = q => { const m = 12*60 + q*15; return String(Math.floor(m/60)%24).padStart(2,'0') + ':' + String(m%60).padStart(2,'0'); };
+const dayObj = () => DATA.days.find(d => d.key === day);
+const byId = {}; DATA.days.forEach(d => d.acts.forEach(a => byId[a.id] = {...a, day:d.key}));
+
+// ---------- tabs ----------
+function renderTabs(){
+  const t = $('#tabs'); t.innerHTML = '';
+  DATA.days.forEach(d => {
+    const b = document.createElement('button'); b.type = 'button';
+    b.className = 'tab' + (d.key === day ? ' on' : '') + (d.key === todayKey ? ' today' : '');
+    const dt = new Date(d.date + 'T12:00:00');
+    b.innerHTML = d.label + '<small>' + dt.getDate() + ' ' + dt.toLocaleString('en', {month:'short'}) + '</small>';
+    b.onclick = () => { day = d.key; store.set(KEY_DAY, day); renderAll(); $('#grid').scrollTop = 0; };
+    t.appendChild(b);
+  });
+  const m = $('#mode'); m.classList.toggle('on', picksMode);
+}
+
+// ---------- grid ----------
+function renderGrid(){
+  const d = dayObj(); const sheet = $('#sheet'); sheet.innerHTML = '';
+  const corner = document.createElement('div'); corner.className = 'corner'; sheet.appendChild(corner);
+  DATA.stages.forEach((s, i) => {
+    const h = document.createElement('div'); h.className = 'stage'; h.style.setProperty('--sc', `var(--s${i})`);
+    h.innerHTML = '<i></i>' + s; sheet.appendChild(h);
+  });
+  const times = document.createElement('div'); times.className = 'times';
+  for (let q = 0; q <= 51; q += 2){                 // every 30 min
+    const lab = document.createElement('div'); lab.className = 't'; lab.style.top = (q*Q) + 'px';
+    lab.textContent = tm(q); if (q % 4) { lab.style.background = 'transparent'; lab.style.color = 'var(--fg2)'; lab.style.fontWeight = '500'; } if (q === 0) lab.style.transform = 'translateY(2px)'; times.appendChild(lab);
+  }
+  sheet.appendChild(times);
+  DATA.stages.forEach((s, i) => {
+    const col = document.createElement('div'); col.className = 'col'; col.style.setProperty('--sc', `var(--s${i})`);
+    d.acts.filter(a => a.stage === i).forEach(a => {
+      const el = document.createElement('div'); const dur = a.end - a.start;
+      el.className = 'act' + (picks.has(a.id) ? ' on' : '') + (dur <= 2 ? ' h1' : dur <= 3 ? ' h2' : dur <= 4 ? ' h3' : '');
+      if (dur > 4) el.style.setProperty('--lines', Math.max(3, Math.floor((dur*Q - 4 - 12 - 15) / 15)));
+      el.style.top = (a.start*Q + 2) + 'px'; el.style.height = (dur*Q - 4) + 'px';
+      el.innerHTML = '<div class="n"></div><div class="tm">' + tm(a.start) + ' – ' + tm(a.end) + '</div>';
+      el.querySelector('.n').textContent = a.name;
+      el.dataset.id = a.id;
+      el.addEventListener('click', () => toggle(a.id, el));
+      col.appendChild(el);
+    });
+    sheet.appendChild(col);
+  });
+  const now = document.createElement('div'); now.className = 'nowline'; now.id = 'now';
+  sheet.appendChild(now);
+  const nl = document.createElement('div'); nl.className = 'nowlbl'; nl.id = 'nowlbl'; times.appendChild(nl);
+  tickNow();
+}
+
+function toggle(id, el){
+  if (picks.has(id)) picks.delete(id); else picks.add(id);
+  store.set(KEY, [...picks]);
+  if (el) el.classList.toggle('on', picks.has(id));
+  if (navigator.vibrate) navigator.vibrate(8);
+  renderCount(); if (picksMode) renderList();
+}
+
+function renderCount(){
+  const d = dayObj(); const n = d.acts.filter(a => picks.has(a.id)).length; const all = picks.size;
+  $('#count').innerHTML = `<b>${n}</b> picked ${d.label.slice(0,3)}${all !== n ? ` · ${all} total` : ''}`;
+}
+
+// ---------- now line ----------
+function tickNow(){
+  const el = $('#now'); if (!el) return;
+  const d = dayObj(); const n = new Date();
+  const start = new Date(d.date + 'T12:00:00'); const mins = (n - start) / 60000;
+  if (mins < -30 || mins > 51*15) { el.style.display = 'none'; const nl = $('#nowlbl'); if (nl) nl.style.display = 'none'; return; }
+  el.style.display = 'block'; el.style.top = (44 + Math.max(0, mins)/15*Q) + 'px';
+  const nl = $('#nowlbl'); nl.style.display = 'block'; nl.style.top = (Math.max(0, mins)/15*Q) + 'px';
+  nl.textContent = String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+}
+setInterval(tickNow, 30000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) tickNow(); });
+
+// ---------- picks list ----------
+function renderList(){
+  const d = dayObj(); const box = $('#list'); box.innerHTML = '';
+  const mine = d.acts.filter(a => picks.has(a.id)).sort((a,b) => a.start - b.start || a.stage - b.stage);
+  if (!mine.length){
+    box.innerHTML = `<div class="empty">Nothing picked for <b>${d.label}</b> yet.<br>Switch to the grid and tap the acts you want to see.</div>`;
+    return;
+  }
+  mine.forEach((a, i) => {
+    const clash = mine.some(b => b !== a && b.start < a.end && a.start < b.end);
+    const r = document.createElement('div'); r.className = 'row'; r.style.setProperty('--sc', `var(--s${a.stage})`);
+    r.innerHTML = `<div class="when">${tm(a.start)}<small>${tm(a.end)}</small></div>
+      <div class="what"><div class="n"></div><div class="s"><i></i>${DATA.stages[a.stage]}${clash ? '<span class="clash">clash</span>' : ''}</div></div>
+      <button class="x" type="button" aria-label="Remove">×</button>`;
+    r.querySelector('.n').textContent = a.name;
+    r.querySelector('.x').onclick = () => { toggle(a.id); renderGridState(); renderList(); };
+    box.appendChild(r);
+  });
+  const act = document.createElement('div'); act.className = 'actions';
+  act.innerHTML = `<button class="btn" id="share" type="button">Share ${d.label}</button><button class="btn warn" id="clear" type="button">Clear ${d.label}</button>`;
+  box.appendChild(act);
+  $('#share').onclick = () => {
+    const txt = `Draaimolen ${d.label}\n` + mine.map(a => `${tm(a.start)}–${tm(a.end)}  ${a.name}  @ ${DATA.stages[a.stage]}`).join('\n');
+    if (navigator.share) navigator.share({text: txt}).catch(()=>{});
+    else if (navigator.clipboard) navigator.clipboard.writeText(txt).then(() => toast('Copied to clipboard'));
+  };
+  $('#clear').onclick = () => {
+    if (!confirm(`Remove all ${mine.length} picks for ${d.label}?`)) return;
+    mine.forEach(a => picks.delete(a.id)); store.set(KEY, [...picks]); renderAll();
+  };
+  const h = document.createElement('div'); h.className = 'hint';
+  h.textContent = 'Picks are saved on this phone only. Open the app from the same icon each time to keep them.';
+  box.appendChild(h);
+}
+function renderGridState(){ document.querySelectorAll('.act').forEach(el => el.classList.toggle('on', picks.has(el.dataset.id))); }
+
+function toast(msg){ const t = $('#toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 1800); }
+
+$('#mode').onclick = () => { picksMode = !picksMode; store.set(KEY_MODE, picksMode); document.body.classList.toggle('picks', picksMode); renderTabs(); if (picksMode) renderList(); };
+
+function renderAll(){ document.body.classList.toggle('picks', picksMode); renderTabs(); renderGrid(); renderCount(); if (picksMode) renderList(); }
+renderAll();
+
+// scroll the grid to "now" on festival days, otherwise to the top
+(() => { const el = $('#now'); if (el && el.style.display === 'block') $('#grid').scrollTop = Math.max(0, parseFloat(el.style.top) - 160); })();
+</script>
+</body>
+</html>
