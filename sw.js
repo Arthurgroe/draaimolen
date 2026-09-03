@@ -1,7 +1,7 @@
 // Draaimolen '26 – offline cache.
 // Navigations: network first (fresh page when online), cache when offline. Everything else: cache first, refreshed in the background.
-const VERSION = 'dm26-v2';
-const CORE = ['./', './index.html', './icon.png', './apple-touch-icon.png', './manifest.webmanifest'];
+const VERSION = 'dm26-v3';
+const CORE = ['./', './index.html', './icon.png', './apple-touch-icon.png', './manifest.webmanifest', './map.png'];
 const MAP = 'https://cdn.sanity.io/images/ow8hsen7/production/93f2b2ebc605e4849617efccdc46553082013734-1080x1350.png?w=1080&fit=max&auto=format&q=80';
 const ours = url => url.origin === self.location.origin || url.href.startsWith('https://cdn.sanity.io/');
 
