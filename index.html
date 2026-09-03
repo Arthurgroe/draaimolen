@@ -506,6 +506,9 @@ $('#frienddismiss').onclick = () => { friend = new Set(); renderAll(); };
 function renderAll(){ setViewClass(); renderTabs(); renderGrid(); renderCount(); renderFriend(); tickStrip(); if (picksMode()) renderList(); if (view === 'map') renderMap(); }
 renderAll();
 
+// offline: cache the app on the phone so it works without signal in the forest
+if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); }); }
+
 // scroll the grid to "now" on festival days, otherwise to the top
 (() => { const el = $('#now'); if (el && el.style.display === 'block') $('#grid').scrollTop = Math.max(0, parseFloat(el.style.top) - 160); })();
 </script>
