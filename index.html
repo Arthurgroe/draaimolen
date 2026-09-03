@@ -216,6 +216,30 @@ body.tod-night{background:
     radial-gradient(50% 45% at 90% 65%, rgba(60,90,100,.35), transparent 70%),
     radial-gradient(40% 30% at 25% 85%, rgba(60,100,95,.3), transparent 70%),
     linear-gradient(180deg,#1b302c 0%,#162824 45%,#0f1d1a 100%);background-attachment:fixed}
+
+/* ---------- landscape: compact header on one row ---------- */
+@media (orientation: landscape) and (max-height: 520px) {
+  header{display:grid;grid-template-columns:auto minmax(150px,1fr) minmax(190px,1.2fr);align-items:center;column-gap:10px;
+    padding:calc(var(--sat) + 5px) calc(var(--sar) + 10px) 5px calc(var(--sal) + 10px)}
+  .title{grid-column:1;gap:6px}
+  .title h1{font-size:14px;letter-spacing:.01em}
+  .count{display:none}
+  nav{grid-column:2;margin:0}
+  .tabs{gap:4px}
+  .tab{padding:6px 4px;font-size:12.5px}
+  .tab small{display:inline;margin:0 0 0 4px;font-size:10px}
+  .tab.today small::after{content:" · today"}
+  .views{grid-column:3;margin:0;padding:2px}
+  .view{padding:6px 4px;font-size:12px}
+  .strip{grid-column:1 / -1;margin:5px 0 0;padding:4px 10px;font-size:11.5px;display:none}
+  .strip.show{display:flex;gap:14px;overflow:hidden}
+  .strip .nn{flex:1;min-width:0;font-size:11px}
+  .strip .nn + .nn{margin-top:0}
+  .friendbar{grid-column:1 / -1;margin:5px 0 0;padding:5px 10px;font-size:12px}
+  #main{margin:0 var(--sar) 0 var(--sal)}
+  .stage{font-size:11.5px}
+  #list,#map{padding-top:8px}
+}
 </style>
 </head>
 <body>
