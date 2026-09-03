@@ -68,7 +68,7 @@ nav{display:flex;align-items:center;gap:8px;margin:10px 0 8px}
 #main{flex:1;position:relative;min-height:0}
 #grid,#list,#map{position:absolute;inset:0}
 #grid{overflow:auto;-webkit-overflow-scrolling:touch;
-  scroll-padding-left:var(--tcol);scroll-snap-type:x proximity}
+  scroll-padding-left:var(--tcol)}
 .sheet{position:relative;display:grid;grid-template-columns:var(--tcol) repeat(6,var(--col));
   grid-template-rows:var(--head) calc(51 * var(--q));
   width:max-content;padding-right:calc(var(--sar) + 16px);padding-bottom:calc(var(--sab) + 24px)}
@@ -76,7 +76,7 @@ nav{display:flex;align-items:center;gap:8px;margin:10px 0 8px}
   border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
 .stage{position:sticky;top:0;z-index:3;background:#213833;
   border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 10px;font-size:12.5px;font-weight:800;letter-spacing:.06em;
-  text-transform:uppercase;text-shadow:var(--glow);scroll-snap-align:start}
+  text-transform:uppercase;text-shadow:var(--glow)}
 .stage i{display:none}
 .times{position:sticky;left:0;z-index:4;background:#213833;border-right:1px solid var(--line)}
 .t{position:absolute;right:5px;font-size:10px;font-weight:600;color:var(--fg);background:var(--chip);padding:2px 4px;border-radius:3px;
@@ -178,8 +178,8 @@ body.picks #grid,body.map #grid{visibility:hidden;pointer-events:none} body.pick
 .act.on .badge.hybrid{color:var(--pick)}
 .act.h1 .badge{margin-left:5px}
 .row .badge{font-size:9px;vertical-align:1px}
-.sunline{position:absolute;left:0;right:0;height:0;border-top:1px dashed rgba(233,167,92,.7);z-index:1;pointer-events:none}
-.sunlbl{position:absolute;left:0;right:0;text-align:center;font-size:9.5px;font-weight:700;color:var(--pick);
+.sunline{position:absolute;left:0;right:0;height:0;border-top:1px dashed rgba(238,238,238,.55);z-index:1;pointer-events:none}
+.sunlbl{position:absolute;left:0;right:0;text-align:center;font-size:9.5px;font-weight:700;color:var(--fg);
   transform:translateY(-50%);line-height:1;padding:3px 0;background:#213833;z-index:1}
 .strip{display:none;margin:-4px 0 10px;padding:8px 12px;border-radius:8px;background:var(--pill-dark);border:1px solid var(--pill-border);
   font-size:12.5px;font-weight:600;color:var(--fg);text-align:center;letter-spacing:.02em}
